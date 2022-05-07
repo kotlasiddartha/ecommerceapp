@@ -38,4 +38,18 @@ function addProducts(data, callback){
     }); 
 }
 
-module.exports = {listProducts, addProducts};
+function getProductDetails(data, cb){
+    let sql = `select p.name as name, p.price as price, p.Description as description ,
+                if((select count(*) from orderDetails as od left join orderItems as oi on
+                oi.orderID = od.ID where oi.ProductID = p.ID and od.UserId = ? and od.orderStatus = 1)> 0 ,1,0) as
+                addToCart from products as p where p.id = ? limit 1`;
+
+    let values = [];
+    values.push(data.userId);
+    values.push(data.productId);
+    sqlConnection.executeQuery(sql, values, function(err, result){
+        cb(err, result);
+    });
+}
+
+module.exports = {listProducts, addProducts, getProductDetails};
